@@ -8,7 +8,7 @@
 #define DWIDTH aa_imgwidth(context)
 #define DHEIGHT aa_imgheight(context)
 #define PI 3.1415926535897932384626433832795
-#define SCROLLER_HEIGHT 20
+#define SCROLLER_HEIGHT 21
 
 aa_context *context;
 aa_renderparams *params;
@@ -28,8 +28,6 @@ int main(int argc, char **argv)
   params = aa_getrenderparams();
   int ticks = 0;
 
-  int i, y;
-  char s[256];
   float p_color_percent = 0;
   float p_color_goal = 1000;
 
@@ -57,7 +55,7 @@ int main(int argc, char **argv)
   int scroller[aa_imgwidth(context)+1][SCROLLER_HEIGHT];
   for(int x = 0; x < aa_imgwidth(context)+1; x++)
   {
-    for(int y = 0; y < SCROLLER_HEIGHT; y++)
+    for(int y = 0; y < SCROLLER_HEIGHT+1; y++)
     {
       scroller[x][y] = 0;
     }
@@ -68,7 +66,7 @@ int main(int argc, char **argv)
   for(int x = 0; x < aa_imgwidth(context); x++)
   {
     n++;
-    if(n > 7)
+    if(n > (SCROLLER_HEIGHT - 14))
     {
       n = 0;
     }
@@ -82,15 +80,16 @@ int main(int argc, char **argv)
 
     scroller[x][7+n] = 255;
 
-    scroller[x][14] = 1;
-    scroller[x][15] = 1;
-    scroller[x][16] = 128;
-    scroller[x][17] = 255;
-    scroller[x][18] = 128;
-    scroller[x][19] = 1;
-    scroller[x][20] = 1;
+    scroller[x][SCROLLER_HEIGHT - 5] = 1;
+    scroller[x][SCROLLER_HEIGHT - 6] = 1;
+    scroller[x][SCROLLER_HEIGHT - 5] = 128;
+    scroller[x][SCROLLER_HEIGHT - 4] = 255;
+    scroller[x][SCROLLER_HEIGHT - 3] = 128;
+    scroller[x][SCROLLER_HEIGHT - 2] = 1;
+    scroller[x][SCROLLER_HEIGHT - 1] = 1;
   }
 
+  int f_column = 0;
   // main loop
   while(1)
   {
@@ -137,10 +136,21 @@ int main(int argc, char **argv)
     // update scroll buffer once every three frames
     if(ticks % 3 == 0)
     {
+      if(f_column > 21)
+      {
+        f_column = 0;
+      }
+
+      for(int y = 0; y <= SCROLLER_HEIGHT; y++)
+      {
+        scroller[aa_imgwidth(context)][y] = fontdata[f_column * 21 + y];
+      }
+
+      f_column++;
 
       for(int x = 0; x < aa_imgwidth(context); x++)
       {
-        for(int y = 0; y <= 20; y++)
+        for(int y = 0; y <= SCROLLER_HEIGHT; y++)
         {
           scroller[x][y] = scroller[x+1][y];
         }
@@ -154,7 +164,7 @@ int main(int argc, char **argv)
       int w = (int)( aa_imgheight(context)/2 - 10
                      + (7 * sin((x + m_time) / 33.0)) 
                      + (4 * sin((x - (m_time*1.2)) / 72.0)) );
-      for(int y = 0; y < 20; y++)
+      for(int y = 0; y < SCROLLER_HEIGHT; y++)
       {
         if(scroller[x][y])
         {
