@@ -8,6 +8,7 @@
 #define DWIDTH aa_imgwidth(context)
 #define DHEIGHT aa_imgheight(context)
 #define PI 3.1415926535897932384626433832795
+#define SCROLLER_HEIGHT 20
 
 aa_context *context;
 aa_renderparams *params;
@@ -46,6 +47,36 @@ int main(int argc, char **argv)
 	exit(3);
     }
 
+    // init scroller buffer
+    int scroller[aa_imgwidth(context)][SCROLLER_HEIGHT];
+    for(int x = 0; x < aa_imgwidth(context); x++)
+    {
+      scroller[x][0] = 1;
+      scroller[x][1] = 1;
+      scroller[x][2] = 128;
+      scroller[x][3] = 255;
+      scroller[x][4] = 128;
+      scroller[x][5] = 1;
+      scroller[x][6] = 1;
+
+      scroller[x][7] = 0;
+      scroller[x][8] = 0;
+      scroller[x][9] = 0;
+      scroller[x][10] = 0;
+      scroller[x][11] = 0;
+      scroller[x][12] = 0;
+      scroller[x][13] = 0;
+
+      scroller[x][14] = 1;
+      scroller[x][15] = 1;
+      scroller[x][16] = 128;
+      scroller[x][17] = 255;
+      scroller[x][18] = 128;
+      scroller[x][19] = 1;
+      scroller[x][20] = 1;
+    }
+
+
     aa_hidecursor(context);
 
     while(1)
@@ -67,7 +98,7 @@ int main(int argc, char **argv)
       {
         for(int x = 0; x < aa_imgwidth(context); x++)
         {
-          params->bright = 0;
+          params->bright = -1;
           params->gamma = 2;
           params->dither = AA_NONE;
           params->randomval = 0;
@@ -94,16 +125,16 @@ int main(int argc, char **argv)
       // sin wave
       for(int x = 0; x < aa_imgwidth(context); x++)
       {
-        int y = (int)( aa_imgheight(context)/2 
+        int w = (int)( aa_imgheight(context)/2 - 10
                        + (7 * sin((x + m_time) / 33.0)) 
                        + (4 * sin((x - (m_time*1.2)) / 72.0)) );
-        aa_putpixel(context, x, y - 3, 0);
-        aa_putpixel(context, x, y - 2, 0);
-        aa_putpixel(context, x, y - 1, 128);
-        aa_putpixel(context, x, y, 255);
-        aa_putpixel(context, x, y + 1, 128);
-        aa_putpixel(context, x, y + 2, 0);
-        aa_putpixel(context, x, y + 3, 0);
+        for(int y = 0; y < 20; y++)
+        {
+          if(scroller[x][y])
+          {
+            aa_putpixel(context, x, w + y, scroller[x][y]);
+          }
+        }
       }
 
       aa_render(context, params, 0, 0, aa_scrwidth(context), aa_scrheight(context));
