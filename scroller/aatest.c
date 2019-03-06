@@ -26,6 +26,7 @@ long getMicrotime()
 int main(int argc, char **argv)
 {
     params = aa_getrenderparams();
+    int ticks = 0;
 
     int i, y;
     char s[256];
@@ -47,10 +48,26 @@ int main(int argc, char **argv)
 	exit(3);
     }
 
+    int n = 0;
+
     // init scroller buffer
-    int scroller[aa_imgwidth(context)][SCROLLER_HEIGHT];
+    int scroller[aa_imgwidth(context)+1][SCROLLER_HEIGHT];
+    for(int x = 0; x < aa_imgwidth(context)+1; x++)
+    {
+      for(int y = 0; y < SCROLLER_HEIGHT; y++)
+      {
+        scroller[x][y] = 0;
+      }
+    }
+
+    // sample scroller data
     for(int x = 0; x < aa_imgwidth(context); x++)
     {
+      n++;
+      if(n > 7)
+      {
+        n = 0;
+      }
       scroller[x][0] = 1;
       scroller[x][1] = 1;
       scroller[x][2] = 128;
@@ -67,6 +84,8 @@ int main(int argc, char **argv)
       scroller[x][12] = 0;
       scroller[x][13] = 0;
 
+      scroller[x][7+n] = 255;
+
       scroller[x][14] = 1;
       scroller[x][15] = 1;
       scroller[x][16] = 128;
@@ -81,6 +100,8 @@ int main(int argc, char **argv)
 
     while(1)
     {
+      ticks++;
+
       if(p_color_percent < p_color_goal)
       {
         p_color_percent++;
@@ -121,6 +142,21 @@ int main(int argc, char **argv)
 
         }
       }
+
+      // update scroll buffer once every three frames
+      if(ticks % 3 == 0)
+      {
+
+
+        for(int x = 0; x < aa_imgwidth(context); x++)
+        {
+          for(int y = 0; y <= 20; y++)
+          {
+            scroller[x][y] = scroller[x+1][y];
+          }
+        }
+      }
+
 
       // sin wave
       for(int x = 0; x < aa_imgwidth(context); x++)
