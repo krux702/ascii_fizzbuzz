@@ -28,6 +28,8 @@ int main(int argc, char **argv)
 
     int i, y;
     char s[256];
+    float p_color_percent = 0;
+    float p_color_goal = 1000;
 
     if (!aa_parseoptions(NULL, NULL, &argc, argv) || argc != 1) {
 	printf("%s\n", aa_help);
@@ -46,8 +48,17 @@ int main(int argc, char **argv)
 
     aa_hidecursor(context);
 
-    for (int i = 0 ; i < 10000; i++)
+    while(1)
     {
+      if(p_color_percent < p_color_goal)
+      {
+        p_color_percent++;
+      }
+      else if(p_color_percent > p_color_goal)
+      {
+        p_color_percent--;
+      }
+
       m_time = getMicrotime();
 
 
@@ -73,14 +84,31 @@ int main(int argc, char **argv)
             + (128.0 * sin(((x + m_time) + (y + m_time)) / 16.0)) + 128.0
             + 128.0 + (128.0 * sin(sqrt((double)(x * x + y * y)) / 8.0))
             / 4);
+          color = (int)((float)color * (p_color_percent / 1000));
 
           aa_putpixel(context, x, y, color);
 
         }
       }
 
+      // sin wave
+      for(int x = 0; x < aa_imgwidth(context); x++)
+      {
+        int y = (int)( aa_imgheight(context)/2 
+                       + (7 * sin((x + m_time) / 33.0)) 
+                       + (4 * sin((x - (m_time*1.2)) / 72.0)) );
+        aa_putpixel(context, x, y - 3, 0);
+        aa_putpixel(context, x, y - 2, 0);
+        aa_putpixel(context, x, y - 1, 128);
+        aa_putpixel(context, x, y, 255);
+        aa_putpixel(context, x, y + 1, 128);
+        aa_putpixel(context, x, y + 2, 0);
+        aa_putpixel(context, x, y + 3, 0);
+      }
+
       aa_render(context, params, 0, 0, aa_scrwidth(context), aa_scrheight(context));
 //      aa_fastrender(context, 0, 0, aa_scrwidth(context), aa_scrheight(context));
+//      aa_printf(context, 0, 0, AA_SPECIAL, "percent %f",p_color_percent);
       aa_flush(context);
     }
 
