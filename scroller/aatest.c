@@ -99,10 +99,6 @@ int main(int argc, char **argv)
         // params->dither = AA_ERRORDISTRIB;
         // https://lodev.org/cgtutor/plasma.html
 
-        /*
-          int color = (int)((128 + (128 * sin((x + m_time) / 8.0)) + 128 + (128 * sin((y + m_time) / 8.0)))/2);
-        */
-
         int color = (int)(128.0 + (128.0 * sin((x + m_time) / 16.0))
           + 128.0 + (128.0 * sin((y + m_time)/ 8.0)) + 128.0
           + (128.0 * sin(((x + m_time) + (y + m_time)) / 16.0)) + 128.0
