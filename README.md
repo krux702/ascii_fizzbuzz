@@ -6,3 +6,9 @@ old school text scroller.
 
 This code requires aalib ( http://aa-project.sourceforge.net/aalib/ ) which is a fairly old ascii art GFX library
 which handles the hard work of virtualizing a VGA display and representing it in ASCII.
+
+# Demo Time
+
+A capture of the demo running is here on YouTube:
+
+https://www.youtube.com/watch?v=trPb024I04k
