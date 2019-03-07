@@ -9,7 +9,7 @@
 #define DHEIGHT aa_imgheight(context)
 #define PI 3.1415926535897932384626433832795
 #define SCROLLER_HEIGHT 22
-#define FONT_HEIGHT 21
+#define FONT_HEIGHT 19
 #define FONT_WIDTH 23
 #define FONT_OFFSET 460
 
@@ -19,9 +19,8 @@ aa_renderparams *params;
 float v;
 long m_time;
 unsigned char debug_data;
-unsigned char message_scroll[] = "0123456789 abcdefghijklmnopqrstuvwxyz !@#%^&*()-=+,.?'\"    ";
 int messsage_scroll_index;
-
+unsigned char message_scroll[2000];
 long getMicrotime()
 {
   struct timeval currentTime;
@@ -31,6 +30,39 @@ long getMicrotime()
 
 int main(int argc, char **argv)
 {
+  // setup our scroll message with FizzBuzz
+
+  strcpy( message_scroll, "Let's do a programming challenge called \"FizzBuzz\" ... Here we go ... ");
+
+  for(int i = 1; i <= 100; i++)
+  {
+    if((i % 3) == 0)
+    {
+      strcat( message_scroll, "Fizz");
+      if((i % 5) == 0)
+      {
+        strcat( message_scroll, "Buzz");
+      }
+      strcat( message_scroll, " ");
+    }
+    else if((i % 5) == 0)
+    {
+      strcat( message_scroll, "Buzz ");
+    }
+    else
+    {
+      char int_string[8];
+      sprintf(int_string, "%d ", i);
+      strcat( message_scroll, int_string);
+    }
+  }
+
+  strcat( message_scroll, " ... That was fun ... Greets go out to all my Psychoholics, the crazy cats at AUS, SYN Shop, and 23b ... ");
+  strcat( message_scroll, " An Uber production by Krux ... ");
+
+
+  // init aalib
+
   params = aa_getrenderparams();
   int ticks = 0;
 
@@ -67,6 +99,7 @@ int main(int argc, char **argv)
     }
   }
 
+  // set our starting point
   int f_column = 0;
   int message_scroll_index = 0;
   char cur_char = message_scroll[message_scroll_index];
@@ -112,13 +145,15 @@ int main(int argc, char **argv)
     }
 
     // update scroll buffer once every three frames
-    if(ticks % 3 == 0)
+    if(ticks % 2 == 0)
     {
       if(f_column > FONT_WIDTH)
       {
         f_column = 0;
         message_scroll_index++;
-        if(message_scroll_index > sizeof(message_scroll))
+
+        // if we reach the end of the array, loop
+        if(message_scroll[message_scroll_index] == 0)
         {
           message_scroll_index = 0;
         }
@@ -141,7 +176,7 @@ int main(int argc, char **argv)
       }
     }
 
-    // sin wave
+    // bouncy sin wave scroller path
     for(int x = 0; x < aa_imgwidth(context); x++)
     {
       int w = (int)( aa_imgheight(context)/2 - 10
@@ -157,8 +192,10 @@ int main(int argc, char **argv)
     }
 
     aa_render(context, params, 0, 0, aa_scrwidth(context), aa_scrheight(context));
+
     // aa_fastrender(context, 0, 0, aa_scrwidth(context), aa_scrheight(context));
     // aa_printf(context, 0, 0, AA_SPECIAL, "char %d  ",debug_data);
+
     aa_flush(context);
   }
 
