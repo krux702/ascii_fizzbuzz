@@ -8,13 +8,19 @@
 #define DWIDTH aa_imgwidth(context)
 #define DHEIGHT aa_imgheight(context)
 #define PI 3.1415926535897932384626433832795
-#define SCROLLER_HEIGHT 21
+#define SCROLLER_HEIGHT 22
+#define FONT_HEIGHT 21
+#define FONT_WIDTH 23
+#define FONT_OFFSET 460
 
 aa_context *context;
 aa_renderparams *params;
 
 float v;
 long m_time;
+unsigned char debug_data;
+unsigned char message_scroll[] = "0123456789 abcdefghijklmnopqrstuvwxyz !@#%^&*()-=+,.?'\"    ";
+int messsage_scroll_index;
 
 long getMicrotime()
 {
@@ -52,48 +58,25 @@ int main(int argc, char **argv)
   aa_hidecursor(context);
 
   // init scroller buffer
-  int scroller[aa_imgwidth(context)+1][SCROLLER_HEIGHT];
+  int scroller[aa_imgwidth(context)+1][SCROLLER_HEIGHT+1];
   for(int x = 0; x < aa_imgwidth(context)+1; x++)
   {
-    for(int y = 0; y < SCROLLER_HEIGHT+1; y++)
+    for(int y = 0; y <= SCROLLER_HEIGHT + 1; y++)
     {
       scroller[x][y] = 0;
     }
   }
 
-  // sample scroller data
-  int n = 0;
-  for(int x = 0; x < aa_imgwidth(context); x++)
-  {
-    n++;
-    if(n > (SCROLLER_HEIGHT - 14))
-    {
-      n = 0;
-    }
-    scroller[x][0] = 1;
-    scroller[x][1] = 1;
-    scroller[x][2] = 128;
-    scroller[x][3] = 255;
-    scroller[x][4] = 128;
-    scroller[x][5] = 1;
-    scroller[x][6] = 1;
-
-    scroller[x][7+n] = 255;
-
-    scroller[x][SCROLLER_HEIGHT - 5] = 1;
-    scroller[x][SCROLLER_HEIGHT - 6] = 1;
-    scroller[x][SCROLLER_HEIGHT - 5] = 128;
-    scroller[x][SCROLLER_HEIGHT - 4] = 255;
-    scroller[x][SCROLLER_HEIGHT - 3] = 128;
-    scroller[x][SCROLLER_HEIGHT - 2] = 1;
-    scroller[x][SCROLLER_HEIGHT - 1] = 1;
-  }
-
   int f_column = 0;
+  int message_scroll_index = 0;
+  char cur_char = message_scroll[message_scroll_index];
+
   // main loop
   while(1)
   {
     ticks++;
+    m_time = getMicrotime();
+
     if(p_color_percent < p_color_goal)
     {
       p_color_percent++;
@@ -102,7 +85,6 @@ int main(int argc, char **argv)
     {
       p_color_percent--;
     }
-    m_time = getMicrotime();
 
     // plasma background effect
     for(int y = 0; y < aa_imgheight(context); y++)
@@ -136,14 +118,20 @@ int main(int argc, char **argv)
     // update scroll buffer once every three frames
     if(ticks % 3 == 0)
     {
-      if(f_column > 21)
+      if(f_column > FONT_WIDTH)
       {
         f_column = 0;
+        message_scroll_index++;
+        if(message_scroll_index > sizeof(message_scroll))
+        {
+          message_scroll_index = 0;
+        }
+        cur_char = message_scroll[message_scroll_index];
       }
 
-      for(int y = 0; y <= SCROLLER_HEIGHT; y++)
+      for(int y = 0; y <= FONT_HEIGHT; y++)
       {
-        scroller[aa_imgwidth(context)][y] = fontdata[f_column * 21 + y];
+        scroller[aa_imgwidth(context)][y] = fontdata[f_column + (y * FONT_WIDTH) + (char_offset[cur_char] * FONT_OFFSET)];
       }
 
       f_column++;
@@ -157,14 +145,13 @@ int main(int argc, char **argv)
       }
     }
 
-
     // sin wave
     for(int x = 0; x < aa_imgwidth(context); x++)
     {
       int w = (int)( aa_imgheight(context)/2 - 10
-                     + (7 * sin((x + m_time) / 33.0)) 
+                     + (7 * sin((x + m_time) / 33.0))
                      + (4 * sin((x - (m_time*1.2)) / 72.0)) );
-      for(int y = 0; y < SCROLLER_HEIGHT; y++)
+      for(int y = 0; y <= SCROLLER_HEIGHT; y++)
       {
         if(scroller[x][y])
         {
@@ -175,7 +162,7 @@ int main(int argc, char **argv)
 
     aa_render(context, params, 0, 0, aa_scrwidth(context), aa_scrheight(context));
     // aa_fastrender(context, 0, 0, aa_scrwidth(context), aa_scrheight(context));
-    // aa_printf(context, 0, 0, AA_SPECIAL, "percent %f",p_color_percent);
+    // aa_printf(context, 0, 0, AA_SPECIAL, "char %d  ",debug_data);
     aa_flush(context);
   }
 
