@@ -3,7 +3,7 @@
 #include <string.h>
 #include <math.h>
 #include <sys/time.h>
-#include "aatest.h"
+#include "ascii_fizzbuzz.h"
 
 #define DWIDTH aa_imgwidth(context)
 #define DHEIGHT aa_imgheight(context)
